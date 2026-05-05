@@ -2,13 +2,13 @@ import { fetchNotes } from "@/lib/api";
 import { NoteList } from "@/components/NoteList/NoteList";
 
 interface FilterPageProps {
-  params: Promise<{ tag?: string[] }>;
+  params: Promise<{ slug?: string[] }>;
 }
 
 export default async function FilteredNotesPage({ params }: FilterPageProps) {
-  const { tag } = await params;
+  const { slug } = await params;
   
-  const currentTag = tag?.[0] === "all" ? undefined : tag?.[0];
+  const currentTag = slug?.[0] === "all" ? "" : slug?.[0] || "";
 
   const data = await fetchNotes({ search: currentTag });
 
