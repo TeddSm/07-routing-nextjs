@@ -8,12 +8,12 @@ import css from "./NoteList.module.css";
 import type { Note } from "../../types/note";
 import Link from "next/link";
 
-
 interface NoteListProps {
   notes: Note[];
+  onNoteClick?: (id: string) => void;
 }
 
-export const NoteList: React.FC<NoteListProps> = ({ notes }) => {
+export const NoteList: React.FC<NoteListProps> = ({ notes, onNoteClick }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -30,10 +30,15 @@ export const NoteList: React.FC<NoteListProps> = ({ notes }) => {
   return (
     <ul className={css.list}>
       {notes.map((note) => (
-        <li key={note.id} className={css.listItem}>
+        <li 
+          key={note.id} 
+          className={css.listItem}
+          onClick={() => onNoteClick?.(note.id)}
+          style={{ cursor: onNoteClick ? 'pointer' : 'default' }}
+        >
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
-          <div className={css.footer}>
+          <div className={css.footer} onClick={(e) => e.stopPropagation()}> 
             <span className={css.tag}>{note.tag}</span>
             <Link href={`/notes/${note.id}`}>View details</Link>
             <button

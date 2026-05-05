@@ -1,3 +1,4 @@
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
 import NotesClient from "./Notes.client";
 
@@ -9,9 +10,16 @@ export default async function FilteredNotesPage({ params }: FilterPageProps) {
   const { slug } = await params;
   const currentTag = slug?.[0] === "all" ? "" : slug?.[0] || "";
 
-  // Отримуємо дані на сервері
-  const data = await fetchNotes({ search: currentTag });
+  const queryClient = new QueryClient();
 
-  // Передаємо дані в клієнтський компонент, який вимагає тест
-  return <NotesClient notes={data.notes} currentTag={currentTag} />;
+  await queryClient.prefetchQuery({
+    queryKey: ["notes", currentTag],
+    queryFn: () => fetchNotes({ tag: currentTag }),
+  });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <NotesClient currentTag={currentTag} />
+    </HydrationBoundary>
+  );
 }

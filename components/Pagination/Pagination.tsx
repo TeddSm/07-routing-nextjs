@@ -1,24 +1,26 @@
+"use client";
+
 import React from "react";
 import ReactPaginate from "react-paginate";
 import css from "./Pagination.module.css";
 
 interface PaginationProps {
-  pageCount: number;
+  totalPages: number; 
   currentPage: number;
   onPageChange: (selectedPage: number) => void;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
-  pageCount,
+  totalPages, 
   currentPage,
   onPageChange,
 }) => {
-  if (pageCount <= 1) return null; // Рендеримо лише якщо більше 1 сторінки
+  if (totalPages <= 1) return null; 
 
   return (
     <ReactPaginate
-      pageCount={pageCount}
-      forcePage={currentPage - 1} // React Paginate нумерує з 0
+      pageCount={totalPages} 
+      forcePage={currentPage - 1} 
       marginPagesDisplayed={2}
       pageRangeDisplayed={3}
       onPageChange={(data) => onPageChange(data.selected + 1)}
