@@ -1,5 +1,5 @@
 import { fetchNotes } from "@/lib/api";
-import { NoteList } from "@/components/NoteList/NoteList";
+import NotesClient from "./Notes.client";
 
 interface FilterPageProps {
   params: Promise<{ slug?: string[] }>;
@@ -7,19 +7,11 @@ interface FilterPageProps {
 
 export default async function FilteredNotesPage({ params }: FilterPageProps) {
   const { slug } = await params;
-  
   const currentTag = slug?.[0] === "all" ? "" : slug?.[0] || "";
 
+  // Отримуємо дані на сервері
   const data = await fetchNotes({ search: currentTag });
 
-  return (
-    <div>
-      <h1>Notes: {currentTag || "All"}</h1>
-      {data.notes.length > 0 ? (
-        <NoteList notes={data.notes} />
-      ) : (
-        <p>No notes found for this tag.</p>
-      )}
-    </div>
-  );
+  // Передаємо дані в клієнтський компонент, який вимагає тест
+  return <NotesClient notes={data.notes} currentTag={currentTag} />;
 }
