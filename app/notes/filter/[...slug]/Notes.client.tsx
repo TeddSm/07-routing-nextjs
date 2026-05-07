@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@/hooks/useDebounce"; 
+import { useDebounce } from "@/hooks/useDebounce";
 import { fetchNotes } from "@/lib/api";
 import { NoteList } from "@/components/NoteList/NoteList";
 import { SearchBox } from "@/components/SearchBox/SearchBox";
 import { Pagination } from "@/components/Pagination/Pagination";
 import { Modal } from "@/components/Modal/Modal";
+import NoteForm from "@/components/NoteForm/NoteForm"; 
 
 interface NotesClientProps {
   currentTag: string;
@@ -25,22 +26,18 @@ export default function NotesClient({ currentTag }: NotesClientProps) {
     queryKey: ["notes", currentTag, debouncedSearch, page],
     queryFn: () =>
       fetchNotes({
-        tag: currentTag,
+        tag: currentTag === "all" ? "" : currentTag,
         search: debouncedSearch,
         page: page,
       }),
   });
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    setPage(1); 
+  const handleOpenCreateModal = () => {
+    setSelectedNoteId(null); 
+    setIsModalOpen(true);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const openModal = (id: string) => {
+  const openEditModal = (id: string) => {
     setSelectedNoteId(id);
     setIsModalOpen(true);
   };
@@ -55,25 +52,30 @@ export default function NotesClient({ currentTag }: NotesClientProps) {
 
   return (
     <div className="container">
-      <h1>Notes: {currentTag || "All"}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Notes: {currentTag || "All"}</h1>
+        
+        <button 
+          onClick={handleOpenCreateModal}
+          style={{ padding: '10px 20px', cursor: 'pointer' }}
+        >
+          Add Note
+        </button>
+      </div>
 
-      <SearchBox value={searchQuery} onChange={handleSearchChange} />
+      <SearchBox value={searchQuery} onChange={(v) => { setSearchQuery(v); setPage(1); }} />
 
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          {notes.length > 0 ? (
-            <NoteList notes={notes} onNoteClick={openModal} />
-          ) : (
-            <p>No notes found.</p>
-          )}
-
+          <NoteList notes={notes} onNoteClick={openEditModal} />
+          
           {totalPages > 1 && (
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              onPageChange={setPage}
             />
           )}
         </>
@@ -81,8 +83,10 @@ export default function NotesClient({ currentTag }: NotesClientProps) {
 
       {isModalOpen && (
         <Modal onClose={closeModal}>
-          <p>Контент модалки для нотатки: {selectedNoteId}</p>
-          {/* Тут може бути NoteDetailsClient */}
+          <NoteForm 
+            onClose={closeModal} 
+            noteId={selectedNoteId} 
+          />
         </Modal>
       )}
     </div>

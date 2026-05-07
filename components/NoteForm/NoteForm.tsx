@@ -6,6 +6,7 @@ import css from "./NoteForm.module.css";
 import { createNote } from "../../lib/api";
 
 interface NoteFormProps {
+  noteId?: string | null;
   onClose: () => void;
 }
 
